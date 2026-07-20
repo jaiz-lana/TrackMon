@@ -1,7 +1,7 @@
 # TrackMon
 Ini adalah project aplikasi hybrid yang bisa berjalan di web maupun Android.
 
-# TrackMon - Smart Family Financial Tracker
+# TrackMon - Financial Tracker
 
 TrackMon adalah aplikasi pencatatan keuangan berbasis web yang minimalis, cepat, dan aman. Project ini dikembangkan menggunakan arsitektur hybrid modern, sehingga kodenya dapat diakses sebagai web app (PWA) sekaligus dibungkus menjadi aplikasi Android native menggunakan Capacitor.
 
