@@ -19,3 +19,14 @@ Repositori ini berisi seluruh ekosistem pengembangan TrackMon, meliputi:
 
 ## 📱 Cara Mengunduh Aplikasi Android (APK)
 Bagi pengguna yang ingin langsung memasang aplikasi ini di *smartphone* tanpa perlu melakukan *build* dari source code, silakan langsung menuju ke menu **[Releases](https://github.com/jaizlana/TrackMon/releases/tag/v3.0.0)** di sebelah kanan halaman ini untuk mengunduh file `TrackMon.apk` terbaru.
+
+## 🌐 Akses Live Web (GitHub Pages)
+
+Bagi kamu yang ingin langsung mencoba atau menggunakan TrackMon tanpa perlu menginstal aplikasi Android, kamu bisa langsung mengakses versi web resminya melalui tautan di bawah ini:
+
+👉 **[Buka Aplikasi TrackMon via Web Browser](https://jaiz-lana.github.io/TrackMon/)**
+
+### 💡 Tips Penggunaan di Web Browser:
+* **Mendukung PWA (Progressive Web App):** Kamu bisa mem-bookmark atau menambahkan pintasan aplikasi ini langsung ke Layar Utama (Home Screen) HP atau Desktop kamu via browser (klik opsi *Add to Home Screen* / *Install App* pada ikon titik tiga di pojok kanan atas browser).
+* **Kompatibilitas:** Berjalan mulus di Google Chrome, Mozilla Firefox, Brave, Microsoft Edge, maupun Safari.
+* **Penyimpanan Cloud:** Pastikan kamu mengikuti petunjuk integrasi Google Drive yang tertera di dalam aplikasi agar data keuangan keluarga kamu tetap tersinkronisasi dan aman meskipun diakses dari perangkat yang berbeda.
