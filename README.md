@@ -18,7 +18,7 @@ Repositori ini berisi seluruh ekosistem pengembangan TrackMon, meliputi:
 * **Secure Storage:** Integrasi penyimpanan cloud yang aman untuk data keuangan keluarga.
 
 ## 📱 Cara Mengunduh Aplikasi Android (APK)
-Bagi pengguna yang ingin langsung memasang aplikasi ini di *smartphone* tanpa perlu melakukan *build* dari source code, silakan langsung menuju ke menu **[Releases](https://github.com/jaizlana/TrackMon/releases/tag/v3.0.0)** di sebelah kanan halaman ini untuk mengunduh file `TrackMon.apk` terbaru.
+Bagi pengguna yang ingin langsung memasang aplikasi ini di *smartphone* tanpa perlu melakukan *build* dari source code, silakan langsung menuju ke menu **[Releases](https://github.com/jaiz-lana/TrackMon/releases/tag/v3.0.0)** di sebelah kanan halaman ini untuk mengunduh file `TrackMon.apk` terbaru.
 
 ## 🌐 Akses Live Web (GitHub Pages)
 
