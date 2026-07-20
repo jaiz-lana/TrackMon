@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrackMon</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body{background:linear-gradient(145deg,#0f0c29,#302b63,#24243e);min-height:100vh;padding:12px;margin:0;font-family:system-ui,-apple-system,sans-serif}
+        .glass{background:rgba(255,255,255,0.06);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px}
+        .btn{background:#10b981;color:white;padding:10px 20px;border-radius:12px;border:none;font-weight:600;cursor:pointer}
+        .btn:hover{transform:scale(1.02)}
+        input,select{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:white;border-radius:12px;padding:10px 14px;width:100%;font-size:14px}
+        input::placeholder{color:rgba(255,255,255,0.3)}
+        .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+        .grid-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+        .item-card{background:rgba(255,255,255,0.05);border-radius:12px;padding:10px;text-align:center}
+        .tx-item{background:rgba(255,255,255,0.04);border-radius:12px;padding:12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
+        .text-white{color:white}
+        .text-gray{color:#9ca3af}
+        .text-emerald{color:#10b981}
+        .text-red{color:#ef4444}
+        .mt-2{margin-top:8px}
+        .mb-2{margin-bottom:8px}
+        .mb-4{margin-bottom:16px}
+        .flex{display:flex}
+        .flex-wrap{flex-wrap:wrap}
+        .gap-2{gap:8px}
+        .gap-3{gap:12px}
+        .items-center{align-items:center}
+        .justify-between{justify-content:space-between}
+        .w-full{width:100%}
+        .max-w-6xl{max-width:72rem}
+        .mx-auto{margin-left:auto;margin-right:auto}
+        .text-center{text-align:center}
+        .text-sm{font-size:14px}
+        .text-xs{font-size:12px}
+        .font-bold{font-weight:700}
+        .font-black{font-weight:900}
+        .hidden{display:none}
+        .rounded-2xl{border-radius:16px}
+        .p-4{padding:16px}
+        .p-3{padding:12px}
+        .py-2{padding-top:8px;padding-bottom:8px}
+        .px-3{padding-left:12px;padding-right:12px}
+        .overflow-y-auto{overflow-y:auto}
+        .max-h-64{max-height:256px}
+        .gradient-text{background:linear-gradient(135deg,#10b981,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .footer{font-size:10px;color:rgba(255,255,255,0.2);text-align:center;padding:12px 0 4px}
+        @media(max-width:640px){.grid-3{grid-template-columns:1fr 1fr}.stat-card{padding:12px}}
+        .spinner{border:3px solid rgba(255,255,255,0.1);border-top-color:#10b981;border-radius:50%;width:28px;height:28px;animation:spin .8s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .modal-overlay{background:rgba(0,0,0,0.6);backdrop-filter:blur(20px);position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;padding:16px}
+        .modal-box{background:rgba(255,255,255,0.06);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:24px;max-width:400px;width:100%;text-align:center}
+        .save-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#10b981}
+    </style>
+</head>
+<body>
+<div id="app" class="max-w-6xl mx-auto"></div>
+<div id="modal" class="modal-overlay"><div class="modal-box"><div id="modal-icon" class="text-4xl mb-2"></div><h3 id="modal-title" class="text-white font-bold text-lg"></h3><p id="modal-text" class="text-gray mt-2 mb-4"></p><button onclick="closeModal()" class="btn">Oke</button></div></div>
+<script>
+// ============= APP =============
+const APP='TrackMon',DEV='KS',VER='3.0';
+let lang=localStorage.getItem('tm_lang')||'id';
+let curr=localStorage.getItem('tm_curr')||'IDR';
+let txs=JSON.parse(localStorage.getItem('tm_txs')||'[]');
+let chart=null;
+
+const T={id:{balance:'Total Saldo',income:'Pemasukan',expense:'Pengeluaran',chart:'Grafik',items:'Kategori',tx:'Transaksi',add:'Tambah',type:'Jenis',expenseL:'Pengeluaran',incomeL:'Pemasukan',currency:'Mata Uang',amount:'Nominal',date:'Tanggal',category:'Kategori',note:'Keterangan',save:'Simpan',all:'Semua',noTx:'Belum ada transaksi',catPlace:'Contoh: Makanan',notePlace:'Deskripsi',delConfirm:'Hapus transaksi?',scan:'Scan Struk',camera:'Ambil Foto',gallery:'Pilih Gambar',doc:'Pilih Dokumen',scanning:'Memproses...',scanSuccess:'Berhasil!',scanError:'Gagal',theme:'Tema',lang:'Bahasa',noInternet:'Tidak ada internet',analysis:'Analisis',wasteful:'Boros',tip:'💡 Tips',total:'Total',pct:'%',noData:'Belum cukup data',most:'Kategori paling boros',sug:'Saran',saved:'Tersimpan',saving:'Menyimpan...',powered:'Dikembangkan oleh '+DEV+' · Dibantu AI'},en:{balance:'Total Balance',income:'Income',expense:'Expenses',chart:'Chart',items:'Categories',tx:'Transactions',add:'Add',type:'Type',expenseL:'Expense',incomeL:'Income',currency:'Currency',amount:'Amount',date:'Date',category:'Category',note:'Note',save:'Save',all:'All',noTx:'No transactions',catPlace:'e.g. Food',notePlace:'Description',delConfirm:'Delete?',scan:'Scan Receipt',camera:'Take Photo',gallery:'Choose Image',doc:'Choose Document',scanning:'Processing...',scanSuccess:'Success!',scanError:'Failed',theme:'Theme',lang:'Language',noInternet:'No internet',analysis:'Analysis',wasteful:'Wasteful',tip:'💡 Tip',total:'Total',pct:'%',noData:'Not enough data',most:'Most wasteful',sug:'Suggestion',saved:'Saved',saving:'Saving...',powered:'Developed by '+DEV+' · AI Powered'}};
+const RATES={IDR:1,USD:16000,EUR:17500,JPY:110,CNY:2200,MYR:3500,SAR:4200,SGD:12000,GBP:20500,AUD:10500};
+const GKEY='AIzaSyDd3g_wv3nNzGInZvjJ9yLtz2Hn01xqEts';
+
+function _(k,v={}){let x=T[lang]?.[k]||T.id?.[k]||k;for(let p in v)x=x.replace('{'+p+'}',v[p]);return x}
+function fmt(a,c=curr){return (c=='IDR'?'Rp':c)+' '+Number(a).toLocaleString('id-ID')}
+function save(){localStorage.setItem('tm_txs',JSON.stringify(txs));localStorage.setItem('tm_lang',lang);localStorage.setItem('tm_curr',curr);document.querySelector('.save-dot')?.classList.remove('bg-yellow-400');document.querySelector('.save-dot')?.classList.add('bg-green-500')}
+function modal(t,m){const el=document.getElementById('modal');document.getElementById('modal-title').textContent=t;document.getElementById('modal-text').textContent=m;el.style.display='flex';lucide.createIcons()}
+function closeModal(){document.getElementById('modal').style.display='none'}
+
+function render(){
+let inc=0,exp=0;txs.forEach(t=>{let v=Number(t.amount)*(RATES[curr]/RATES[t.currency||'IDR']);if(t.type=='income')inc+=v;else exp+=v});let bal=inc-exp;
+let cats={};txs.forEach(t=>{let c=t.category||'Lainnya';if(!cats[c])cats[c]={inc:0,exp:0};let v=Number(t.amount)*(RATES[curr]/RATES[t.currency||'IDR']);if(t.type=='income')cats[c].inc+=v;else cats[c].exp+=v});
+let an=[],tot=0;Object.values(cats).forEach(d=>tot+=d.exp);Object.entries(cats).forEach(([c,d])=>{if(d.exp>0&&tot>0)an.push({cat:c,amt:d.exp,pct:(d.exp/tot)*100})});an.sort((a,b)=>b.amt-a.amt);
+let top=an[0];let tips={'Makanan':'Masak sendiri, kurangi makan di luar','Transportasi':'Gunakan transportasi umum','Belanja':'Buat daftar belanja','Tagihan':'Matikan lampu yang tidak digunakan','Hiburan':'Cari hiburan gratis','Kesehatan':'Jaga pola makan sehat','Pendidikan':'Gunakan sumber belajar gratis','Lainnya':'Evaluasi kebutuhan vs keinginan'};
+let tipText=top?tips[top.cat]||'Evaluasi kembali pengeluaran Anda':'';
+
+document.getElementById('app').innerHTML=`
+<div class="glass mb-4">
+<div class="flex flex-wrap items-center justify-between gap-2">
+<div class="flex items-center gap-3"><div class="text-3xl">💳</div><div><h1 class="text-xl font-black"><span class="gradient-text">${_('appName')||'TrackMon'}</span></h1><span class="text-xs text-gray">✦ ${VER} <span class="save-dot ml-2" title="${_('saved')}"></span></span></div></div>
+<div class="flex gap-2 flex-wrap">
+<select onchange="curr=this.value;save();render()" class="text-sm py-1 px-2" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:white;padding:6px 12px">${Object.keys(RATES).map(c=>`<option value="${c}" ${c==curr?'selected':''}>${c}</option>`).join('')}</select>
+<select onchange="lang=this.value;save();render()" class="text-sm py-1 px-2" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:white;padding:6px 12px"><option value="id" ${lang=='id'?'selected':''}>🇮🇩</option><option value="en" ${lang=='en'?'selected':''}>🇬🇧</option><option value="ar" ${lang=='ar'?'selected':''}>🇸🇦</option><option value="zh" ${lang=='zh'?'selected':''}>🇨🇳</option><option value="ja" ${lang=='ja'?'selected':''}>🇯🇵</option><option value="th" ${lang=='th'?'selected':''}>🇹🇭</option></select>
+<button onclick="document.body.classList.toggle('light-theme');save();render()" class="btn text-sm py-1 px-3">🌙</button>
+</div></div></div>
+
+<div class="grid-3 mb-4">
+<div class="glass"><div class="text-xs text-gray">${_('balance')}</div><div class="text-xl font-black text-white">${fmt(bal)}</div></div>
+<div class="glass"><div class="text-xs text-gray">${_('income')}</div><div class="text-xl font-black text-emerald">${fmt(inc)}</div></div>
+<div class="glass"><div class="text-xs text-gray">${_('expense')}</div><div class="text-xl font-black text-red">${fmt(exp)}</div></div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+<div class="glass md:col-span-2"><h3 class="font-bold text-white mb-2">${_('chart')}</h3><div class="h-48"><canvas id="chartCanvas"></canvas></div></div>
+<div class="glass"><h3 class="font-bold text-white mb-2">${_('items')}</h3><div class="grid-items max-h-48 overflow-y-auto">${Object.entries(cats).slice(0,8).map(([c,d])=>`<div class="item-card"><div class="text-xs font-bold text-white truncate">${c}</div><div class="text-sm font-bold ${d.inc-d.exp>=0?'text-emerald':'text-red'}">${fmt(d.inc-d.exp)}</div></div>`).join('')||'<div class="text-center text-gray text-sm">'+_('noTx')+'</div>'}</div></div>
+</div>
+
+${txs.length>=3?`<div class="glass mb-4"><h3 class="font-bold text-white mb-2">${_('analysis')}</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-3"><div>${an.slice(0,5).map((a,i)=>`<div class="flex justify-between py-1 border-b border-white/5"><span class="text-sm text-white">${i+1}. ${a.cat}</span><span class="text-red text-sm">${fmt(a.amt)} (${a.pct.toFixed(1)}%)</span></div>`).join('')}</div>${top?`<div class="glass" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);border-radius:12px;padding:12px"><div class="flex gap-2"><span class="text-red text-lg">⚠️</span><span class="font-bold text-white">${top.cat}</span><span class="text-gray text-xs">${top.pct.toFixed(1)}%</span></div><div class="text-xs text-gray mt-1">${_('total')}: ${fmt(top.amt)}</div><div class="mt-2" style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);border-radius:8px;padding:8px"><div class="text-xs font-bold text-emerald">${_('tip')}</div><div class="text-xs text-gray-300">${tipText}</div></div></div>`:''}</div></div>`:`<div class="glass mb-4"><div class="text-center text-gray text-sm py-4">${_('noData')}</div></div>`}
+
+<div class="glass">
+<div class="flex flex-wrap justify-between items-center mb-3"><h3 class="font-bold text-white">${_('tx')}</h3><div class="flex gap-2"><button onclick="document.getElementById('scanOpts').classList.toggle('hidden')" class="btn text-sm py-1 px-3">📷 ${_('scan')}</button><button onclick="document.getElementById('txForm').classList.toggle('hidden')" class="btn text-sm py-1 px-3">+</button></div></div>
+<div id="scanOpts" class="hidden flex gap-2 mb-3 flex-wrap"><button onclick="scan('camera')" class="btn text-sm py-1 px-3" style="background:rgba(255,255,255,0.08)">📷 ${_('camera')}</button><button onclick="scan('gallery')" class="btn text-sm py-1 px-3" style="background:rgba(255,255,255,0.08)">🖼️ ${_('gallery')}</button><button onclick="scan('document')" class="btn text-sm py-1 px-3" style="background:rgba(255,255,255,0.08)">📄 ${_('doc')}</button></div>
+<form id="txForm" class="hidden glass p-3 mb-3" onsubmit="addTx(event)"><div class="grid grid-cols-2 gap-2"><select id="txType" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:white;padding:8px 12px"><option value="expense">${_('expenseL')}</option><option value="income">${_('incomeL')}</option></select><select id="txCurr" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:white;padding:8px 12px">${Object.keys(RATES).map(c=>`<option value="${c}" ${c==curr?'selected':''}>${c}</option>`).join('')}</select></div><input type="number" id="txAmt" required step="0.01" placeholder="${_('amount')}" class="mt-2" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:white;padding:8px 12px;width:100%"><input type="date" id="txDate" required class="mt-2" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:white;padding:8px 12px;width:100%"><input type="text" id="txCat" required placeholder="${_('catPlace')}" class="mt-2" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:white;padding:8px 12px;width:100%"><input type="text" id="txNote" required placeholder="${_('notePlace')}" class="mt-2" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:white;padding:8px 12px;width:100%"><button type="submit" class="btn w-full mt-2">${_('save')}</button></form>
+<div class="max-h-64 overflow-y-auto">${txs.length===0?'<div class="text-center text-gray text-sm py-4">'+_('noTx')+'</div>':[...txs].reverse().map((t,i)=>{let v=Number(t.amount)*(RATES[curr]/RATES[t.currency||'IDR']);return `<div class="tx-item"><div><div class="font-bold text-white text-sm">${t.note}</div><div class="flex gap-2 text-xs text-gray"><span>${t.category}</span><span>${t.date}</span><span>${t.currency}</span></div></div><div class="flex items-center gap-2"><span class="font-bold ${t.type=='income'?'text-emerald':'text-red'}">${t.type=='income'?'+':'-'} ${fmt(v)}</span><button onclick="delTx(\'${t.id}\')" class="text-gray hover:text-red">✕</button></div></div>`}).join('')}</div>
+</div>
+
+<div class="footer">${_('powered')} 🤖 · v${VER}</div>
+`;
+setTimeout(()=>{const c=document.getElementById('chartCanvas');if(c){if(chart)chart.destroy();chart=new Chart(c,{type:'doughnut',data:{labels:[_('income'),_('expense')],datasets:[{data:[inc||1,exp||0],backgroundColor:['rgba(16,185,129,0.7)','rgba(239,68,68,0.7)'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'bottom',labels:{color:document.body.classList.contains('light-theme')?'#4a4a6a':'#9ca3af',boxWidth:10,font:{size:10}}}}}});}},100);
+lucide.createIcons();
+}
+
+function addTx(e){e.preventDefault();const tx={id:'tx_'+Date.now(),type:document.getElementById('txType').value,currency:document.getElementById('txCurr').value,amount:parseFloat(document.getElementById('txAmt').value),date:document.getElementById('txDate').value,category:document.getElementById('txCat').value.trim()||'Lainnya',note:document.getElementById('txNote').value.trim()||'Tanpa'};txs.push(tx);save();document.getElementById('txForm').classList.add('hidden');render()}
+function delTx(id){if(confirm(_('delConfirm'))){txs=txs.filter(t=>t.id!==id);save();render()}}
+
+function scan(mode){document.getElementById('scanOpts').classList.add('hidden');const input=document.createElement('input');input.type='file';if(mode==='camera'){input.capture='environment';input.accept='image/*'}else if(mode==='gallery'){input.accept='image/*'}else{input.accept='image/*,.pdf,.doc,.docx'}input.onchange=(e)=>{const f=e.target.files[0];if(f)processScan(f)};input.click()}
+async function processScan(file){if(!navigator.onLine){modal('⚠️',_('noInternet'));return}modal('⏳',_('scanning'));try{const reader=new FileReader();reader.readAsDataURL(file);reader.onloadend=async()=>{const b64=reader.result.split(',')[1];const mime=file.type;try{const res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+GKEY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{role:'user',parts:[{text:'Ekstrak amount(angka), category(Makanan/Transportasi/Belanja/Tagihan/Hiburan/Kesehatan/Pendidikan/Lainnya), note(nama toko). JSON:{"amount":number,"category":string,"note":string}'},{inlineData:{mimeType:mime,data:b64}}]}],generationConfig:{responseMimeType:'application/json'}})});const data=await res.json();if(data.candidates&&data.candidates.length>0){const r=JSON.parse(data.candidates[0].content.parts[0].text);document.getElementById('txAmt').value=r.amount||'';document.getElementById('txCat').value=r.category||'';document.getElementById('txNote').value=r.note||'';closeModal();document.getElementById('txForm').classList.remove('hidden');modal('✅',_('scanSuccess'))}else{modal('❌',_('scanError'))}}catch(err){modal('❌',_('scanError'))}}}catch(err){modal('❌',_('scanError'))}}
+
+render();
+console.log('🚀 TrackMon v'+VER+' by KS');
+</script>
+</body>
+</html>
